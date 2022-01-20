@@ -49,4 +49,9 @@ describe('CoursesService', () => {
     expect(req.request.method).toEqual('GET');
     req.flush(COURSES[12]);
   });
+
+  afterEach(() => {
+    // Prevent that further requests are being accidentally made by httpTestingController
+    httpTestingController.verify();
+  });
 });
