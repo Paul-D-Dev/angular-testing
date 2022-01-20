@@ -1,6 +1,9 @@
 import { DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
+import { setupCourses } from '../common/setup-test-data';
 import { CoursesModule } from '../courses.module';
 import { CoursesService } from '../services/courses.service';
 
@@ -13,37 +16,49 @@ describe('HomeComponent', () => {
   let fixture: ComponentFixture<HomeComponent>;
   let component: HomeComponent;
   let el: DebugElement;
+  let coursesService: any;
+  const beginnerCourses = setupCourses().filter(
+    (course) => course.category === 'BEGINNER'
+  );
 
-  beforeEach(() => {
-    const coursesServiceSpy = jasmine.createSpyObj('CourseService', [
-      'findAllCourses',
-    ]);
-    TestBed.configureTestingModule({
-      imports: [
-        CoursesModule,
-        NoopAnimationsModule, // deactivate operation animation but it's not break mat anim
-      ],
-      providers: [
-        {
-          provide: CoursesService,
-          useValue: coursesServiceSpy,
-        },
-      ],
+  beforeEach(
+    waitForAsync(() => {
+      const coursesServiceSpy = jasmine.createSpyObj('CoursesService', [
+        'findAllCourses',
+      ]);
+      TestBed.configureTestingModule({
+        imports: [
+          CoursesModule,
+          NoopAnimationsModule, // deactivate operation animation but it's not break mat anim
+        ],
+        providers: [{ provide: CoursesService, useValue: coursesServiceSpy }],
+      })
+        .compileComponents()
+        .then(() => {
+          fixture = TestBed.createComponent(HomeComponent);
+          component = fixture.componentInstance;
+          el = fixture.debugElement;
+          coursesService = TestBed.inject<CoursesService>(CoursesService);
+        });
     })
-      .compileComponents()
-      .then(() => {
-        fixture = TestBed.createComponent(HomeComponent);
-        component = fixture.componentInstance;
-        el = fixture.debugElement;
-      });
-  });
+  );
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
   it('should display only beginner courses', () => {
-    pending();
+    // return an Observable courses
+    coursesService.findAllCourses.and.returnValue(of(beginnerCourses));
+
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+    console.log('beginnerCourses', beginnerCourses);
+    console.log('tabs', tabs);
+    expect(tabs.length).toBe(
+      1,
+      'Unexpected number of tabs found : ' + tabs.length
+    );
   });
 
   it('should display only advanced courses', () => {
