@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { setupCourses } from '../common/setup-test-data';
+import { click } from '../common/test-utils';
 import { CoursesModule } from '../courses.module';
 import { CoursesService } from '../services/courses.service';
 
@@ -83,7 +84,32 @@ describe('HomeComponent', () => {
     expect(tabs.length).toBe(2, 'Expected to find 2 tabs');
   });
 
-  it('should display advanced courses when tab clicked', () => {
-    pending();
+  // Asynchronous Test because of animation when user clicks on second tab
+  it('should display advanced courses when tab clicked', (done) => {
+    coursesService.findAllCourses.and.returnValue(of(setupCourses()));
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+
+    // Simulate click interaction
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    setTimeout(() => {
+      const cardTitles = el.queryAll(
+        By.css('.mat-tab-body-active .mat-card-title')
+      );
+      console.log(1, cardTitles);
+      expect(cardTitles.length).toBeGreaterThan(
+        0,
+        'Could not find cart titles'
+      );
+      console.log(cardTitles[0].nativeElement.textContent);
+      expect(cardTitles[0].nativeElement.textContent).toContain(
+        'Angular Security Course',
+        'Not same title'
+      );
+
+      done();
+    }, 500);
   });
 });
