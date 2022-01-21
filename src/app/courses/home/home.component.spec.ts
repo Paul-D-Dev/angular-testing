@@ -20,6 +20,9 @@ describe('HomeComponent', () => {
   const beginnerCourses = setupCourses().filter(
     (course) => course.category === 'BEGINNER'
   );
+  const advancedCourses = setupCourses().filter(
+    (course) => course.category === 'ADVANCED'
+  );
 
   beforeEach(
     waitForAsync(() => {
@@ -53,8 +56,6 @@ describe('HomeComponent', () => {
 
     fixture.detectChanges();
     const tabs = el.queryAll(By.css('.mat-tab-label'));
-    console.log('beginnerCourses', beginnerCourses);
-    console.log('tabs', tabs);
     expect(tabs.length).toBe(
       1,
       'Unexpected number of tabs found : ' + tabs.length
@@ -62,11 +63,24 @@ describe('HomeComponent', () => {
   });
 
   it('should display only advanced courses', () => {
-    pending();
+    // return an Observable courses
+    coursesService.findAllCourses.and.returnValue(of(advancedCourses));
+
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+    expect(tabs.length).toBe(
+      1,
+      'Unexpected number of tabs found : ' + tabs.length
+    );
   });
 
   it('should display both tabs', () => {
-    pending();
+    // return an Observable courses
+    coursesService.findAllCourses.and.returnValue(of(setupCourses()));
+
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+    expect(tabs.length).toBe(2, 'Expected to find 2 tabs');
   });
 
   it('should display advanced courses when tab clicked', () => {
