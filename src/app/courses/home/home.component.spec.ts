@@ -137,4 +137,30 @@ fdescribe('HomeComponent', () => {
       'Not same title'
     );
   }));
+
+  it('use waitForAsync should display advanced courses when tab clicked', waitForAsync(() => {
+    coursesService.findAllCourses.and.returnValue(of(setupCourses()));
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+
+    // Simulate click interaction
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    fixture.whenStable().then(() => {
+      const cardTitles = el.queryAll(
+        By.css('.mat-tab-body-active .mat-card-title')
+      );
+      expect(cardTitles.length).toBeGreaterThan(
+        0,
+        'Could not find cart titles'
+      );
+
+      expect(cardTitles[0].nativeElement.textContent).toContain(
+        'Angular Security Course',
+        'Not same title'
+      );
+    });
+
+  }));
 });
