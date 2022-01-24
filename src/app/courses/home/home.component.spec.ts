@@ -1,5 +1,5 @@
 import { DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, waitForAsync } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
@@ -13,7 +13,7 @@ import { HomeComponent } from './home.component';
 // This component contains others component is called component container
 // Data come from observables
 
-describe('HomeComponent', () => {
+fdescribe('HomeComponent', () => {
   let fixture: ComponentFixture<HomeComponent>;
   let component: HomeComponent;
   let el: DebugElement;
@@ -85,7 +85,7 @@ describe('HomeComponent', () => {
   });
 
   // Asynchronous Test because of animation when user clicks on second tab
-  it('should display advanced courses when tab clicked', (done) => {
+  it('use DONE should display advanced courses when tab clicked', (done) => {
     coursesService.findAllCourses.and.returnValue(of(setupCourses()));
     fixture.detectChanges();
     const tabs = el.queryAll(By.css('.mat-tab-label'));
@@ -98,12 +98,11 @@ describe('HomeComponent', () => {
       const cardTitles = el.queryAll(
         By.css('.mat-tab-body-active .mat-card-title')
       );
-      console.log(1, cardTitles);
       expect(cardTitles.length).toBeGreaterThan(
         0,
         'Could not find cart titles'
       );
-      console.log(cardTitles[0].nativeElement.textContent);
+
       expect(cardTitles[0].nativeElement.textContent).toContain(
         'Angular Security Course',
         'Not same title'
@@ -112,4 +111,30 @@ describe('HomeComponent', () => {
       done();
     }, 500);
   });
+
+  it('use FakeAsync should display advanced courses when tab clicked', fakeAsync(() => {
+    coursesService.findAllCourses.and.returnValue(of(setupCourses()));
+    fixture.detectChanges();
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+
+    // Simulate click interaction
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    flush();
+    // tick(16) also works 16ms is equal animation's time
+
+    const cardTitles = el.queryAll(
+      By.css('.mat-tab-body-active .mat-card-title')
+    );
+    expect(cardTitles.length).toBeGreaterThan(
+      0,
+      'Could not find cart titles'
+    );
+
+    expect(cardTitles[0].nativeElement.textContent).toContain(
+      'Angular Security Course',
+      'Not same title'
+    );
+  }));
 });
